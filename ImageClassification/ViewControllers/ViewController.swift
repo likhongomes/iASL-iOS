@@ -15,8 +15,7 @@
 import AVFoundation
 import UIKit
 import Speech
-import Firebase
-import KeychainSwift
+
 
 /**Main View controller that's viewed if the user is already signed in or after the user signs into the app. This is where the users carry's out ASL to text to speech and speech to text to communicate with non-deaf/mute people*/
 class ViewController: UIViewController {
@@ -77,7 +76,7 @@ class ViewController: UIViewController {
     ///Another textview to go underneath the current textview
     let outputTextView2 = UITextView()
     ///Keychain reference for when we need to clear the keychain if someone logs out
-    let keychain = KeychainSwift(keyPrefix: "iasl_")
+
 
     // MARK: Global Variables
     ///Constraint to keep track of the height of the output text view, whether it's collapsed or expanded
@@ -254,19 +253,13 @@ class ViewController: UIViewController {
     /// Action invoked when swiped left
     /// - Parameter sender: the gesture recognizer itself
     @objc func handleLeftSwipeGesture(_ sender: UISwipeGestureRecognizer) {
-        let vc = NotesVC()
-        vc.modalTransitionStyle = .crossDissolve
-        vc.modalPresentationStyle = .fullScreen
-        present(vc, animated: true, completion: nil)
+
     }
 
     /// Action invoked when swiped right
     /// - Parameter sender: the gesture recognizer itself
     @objc func handleRightSwipeGesture(_ sender: UISwipeGestureRecognizer) {
-        let vc = RemoteConversationVC()
-        vc.modalTransitionStyle = .crossDissolve
-        vc.modalPresentationStyle = .fullScreen
-        present(vc, animated: true, completion: nil)
+
     }
 
 	
@@ -498,16 +491,7 @@ extension ViewController {
     ///Action when the remote chat button is tapped. Present RemoteConversationVC
     @objc func remoteChatButtonTapped() {
 
-        //check if user is logged in, if not go to login screen
-        checkIfLoggedOut()
 
-        let vc = RemoteConversationVC()
-        vc.modalTransitionStyle = .crossDissolve
-        vc.modalPresentationStyle = .fullScreen
-        remoteChatButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        remoteChatButton.setTitleColor(#colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1), for: .normal)
-        present(vc, animated: true, completion: nil)
-        //navigationController?.pushViewController(vc, animated: true)
     }
 
     ///Setup live button, Presentes SpeechToTextVC VC
@@ -549,46 +533,13 @@ extension ViewController {
         notesButton.imageView?.contentMode = .scaleAspectFit
     }
 
-    ///checks if there is a user logged in. If there is not, it opens the login VC
-    func checkIfLoggedOut() {
-        if Auth.auth().currentUser?.uid == nil {
-            //present the login screen
-            print("user is not signed in")
-            let loginController = LoginVC()
-            loginController.modalTransitionStyle = .crossDissolve
-            loginController.modalPresentationStyle = .fullScreen
-            present(loginController, animated: true, completion: nil)
-            return
-        }
-    }
 
-    /**
-     Checks if the user is logged out so we can disable the log out button
-     - Returns: True if user is not looged in, false otherwise
-     */
-    func userIsLoggedOut() -> Bool {
-        if Auth.auth().currentUser?.uid == nil {
-            print("user is not signed in")
-            return true
-        }
-        return false
-    }
+
 
     ///Action for note button. Presenets NoteVC
     @objc func notesButtonTapped() {
 
-        //check if user is logged in, if not go to login screen
-        checkIfLoggedOut()
 
-        notesButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
-        notesButton.setTitleColor(#colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1), for: .selected)
-        //let vc = notesVC
-        let vc = NotesVC()
-        //vc.notesVC = vc
-        vc.modalPresentationStyle = .fullScreen
-        vc.modalTransitionStyle = .crossDissolve
-        present(vc, animated: true, completion: nil)
-        //navigationController?.pushViewController(vc, animated: true)
     }
 
     ///Setup position/size/style of the textview holder and add it on screen
@@ -855,37 +806,11 @@ extension ViewController {
         logOutButton.backgroundColor = .systemRed
         logOutButton.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
         logOutButton.layer.cornerRadius = 10
-        logOutButton.addTarget(self, action: #selector(handleLogout), for: .touchUpInside)
 
-        if userIsLoggedOut() {
-            logOutButton.isEnabled = false
-            logOutButton.alpha = 0.2
-        } else {
-            logOutButton.isEnabled = true
-            logOutButton.alpha = 1
-        }
+
     }
 
-    @objc func handleLogout() {
 
-        print("handle logout tapped")
-
-        //log the user out of firebase
-        do {
-            try Auth.auth().signOut()
-        } catch let logoutError {
-            print(logoutError)
-        }
-
-        //remove keys from keychain
-        keychain.clear()
-
-        //present the login screen
-        let loginController = LoginVC()
-        loginController.modalTransitionStyle = .crossDissolve
-        loginController.modalPresentationStyle = .fullScreen
-        present(loginController, animated: true, completion: nil)
-    }
 
     ///Setup prediction assist button's location/size/styling and add on screen
     func predictionAssistButtonSetup() {
